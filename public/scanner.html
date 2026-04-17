@@ -93,6 +93,7 @@ button{cursor:pointer}
 .p-sec{border-top:var(--rule-l);padding:var(--s6)}
 .p-sec-lbl{font-size:9px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--g50);margin-bottom:var(--s5)}
 .phase-grid{display:grid;grid-template-columns:repeat(4,1fr);border:var(--rule-l)}
+.phase-grid-5{grid-template-columns:repeat(5,1fr)}
 .phase-cell{padding:var(--s4) var(--s2);text-align:center;cursor:pointer;border-right:var(--rule-l);
   transition:background .15s;background:var(--white)}
 .phase-cell:last-child{border-right:none}
@@ -101,6 +102,21 @@ button{cursor:pointer}
 .phase-cell span:first-child{display:block;font-size:18px;margin-bottom:4px}
 .phase-cell span:last-child{font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--g50)}
 .phase-cell.on span:last-child{color:rgba(255,255,255,.65)}
+
+/* Makeup intensity selector */
+.intensity-grid{display:grid;grid-template-columns:1fr 1fr;border:var(--rule-l)}
+.intensity-cell{padding:var(--s4);cursor:pointer;border-right:var(--rule-l);border-bottom:var(--rule-l);
+  background:var(--white);transition:background .25s ease,color .25s ease;text-align:left}
+.intensity-cell:nth-child(2n){border-right:none}
+.intensity-cell:nth-child(n+3){border-bottom:none}
+.intensity-cell:hover{background:var(--g05)}
+.intensity-cell.on{background:var(--black)}
+.intensity-cell .i-name{display:block;font-family:var(--serif);font-size:15px;font-weight:400;
+  color:var(--black);line-height:1.15;margin-bottom:6px;letter-spacing:-.005em}
+.intensity-cell.on .i-name{color:var(--white)}
+.intensity-cell .i-desc{display:block;font-size:9px;font-weight:300;color:var(--g50);
+  line-height:1.5;letter-spacing:.02em}
+.intensity-cell.on .i-desc{color:rgba(255,255,255,.55)}
 .sl-row{display:flex;align-items:center;gap:var(--s4);padding:var(--s3) 0;border-bottom:var(--rule-l)}
 .sl-row:last-child{border-bottom:none}
 .sl-lbl{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--black);min-width:80px}
@@ -579,7 +595,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
   </div>
   <div class="w-bottom">
     <h1 class="w-title">Skin<br><em>decoded.</em></h1>
-    <p class="w-sub">Live facial analysis across five zones. RGB redness mapping, texture variance, luminance delta. Calibrated to your cycle, environment and lifestyle.</p>
+    <p class="w-sub">Live facial analysis across five zones. RGB redness mapping, texture variance, luminance delta. Calibrated to your environment, lifestyle and the level of routine you choose — built for every body, every gender.</p>
     <button class="btn-w" onclick="goSetup()">Personalise My Scan</button>
     <button class="btn-inv" onclick="skipSetup()">Quick Scan — Skip Setup</button>
     <button class="btn-tech" onclick="openModal()">▸ How the scanner works</button>
@@ -648,13 +664,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
       </div>
     </div>
 
-    <!-- CYCLE -->
+    <!-- HORMONAL RHYTHM (optional, inclusive) -->
     <div class="p-sec">
-      <p class="p-sec-lbl">Cycle Phase</p>
-      <div class="phase-grid" id="phaseGrid">
+      <p class="p-sec-lbl">Hormonal Rhythm <span style="color:var(--g30);font-weight:400;letter-spacing:.1em;text-transform:none">— optional</span></p>
+      <p style="font-size:11px;font-weight:300;color:var(--g50);line-height:1.6;margin-bottom:var(--s4)">If your body has a monthly cycle and you'd like the scan calibrated to it, choose where you are. If this doesn't apply to you, skip — your results will be just as accurate.</p>
+      <div class="phase-grid phase-grid-5" id="phaseGrid">
+        <div class="phase-cell on" data-p="none" onclick="pickPhase(this)"><span>◯</span><span>Skip</span></div>
         <div class="phase-cell" data-p="menstrual" onclick="pickPhase(this)"><span>🔴</span><span>Menstrual</span></div>
         <div class="phase-cell" data-p="follicular" onclick="pickPhase(this)"><span>🌱</span><span>Follicular</span></div>
-        <div class="phase-cell on" data-p="ovulation" onclick="pickPhase(this)"><span>✨</span><span>Ovulation</span></div>
+        <div class="phase-cell" data-p="ovulation" onclick="pickPhase(this)"><span>✨</span><span>Ovulation</span></div>
         <div class="phase-cell" data-p="luteal" onclick="pickPhase(this)"><span>🌙</span><span>Luteal</span></div>
       </div>
     </div>
@@ -693,13 +711,37 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
     </div>
 
     <!-- CONCERN -->
-    <div class="p-sec" style="padding-bottom:var(--s3)">
+    <div class="p-sec">
       <p class="p-sec-lbl">Primary Concern</p>
       <div class="p-select-w"><select class="p-select" id="concernSel">
         <option>Uneven texture</option><option>Acne / breakouts</option><option>Dark circles</option>
         <option>Dehydration</option><option>Hyperpigmentation</option><option>Large pores</option>
         <option>Redness / sensitivity</option><option>Fine lines</option>
       </select></div>
+    </div>
+
+    <!-- MAKEUP INTENSITY (gender-inclusive) -->
+    <div class="p-sec" style="padding-bottom:var(--s3)">
+      <p class="p-sec-lbl">How much makeup?</p>
+      <p style="font-size:11px;font-weight:300;color:var(--g50);line-height:1.6;margin-bottom:var(--s4)">You decide what your ritual looks like. Skincare-only is just as valid as a full editorial finish.</p>
+      <div class="intensity-grid" id="intensityGrid">
+        <div class="intensity-cell" data-lv="none" onclick="pickIntensity(this)">
+          <span class="i-name">Skincare<br>only</span>
+          <span class="i-desc">No makeup. Just the ritual for your skin.</span>
+        </div>
+        <div class="intensity-cell on" data-lv="minimal" onclick="pickIntensity(this)">
+          <span class="i-name">Minimal</span>
+          <span class="i-desc">A single point of expression. Tinted balm, brow, lip.</span>
+        </div>
+        <div class="intensity-cell" data-lv="refined" onclick="pickIntensity(this)">
+          <span class="i-name">Refined</span>
+          <span class="i-desc">Even-toned skin, defined eye, considered lip.</span>
+        </div>
+        <div class="intensity-cell" data-lv="full" onclick="pickIntensity(this)">
+          <span class="i-name">Full editorial</span>
+          <span class="i-desc">Every step. Sculpted, lacquered, complete.</span>
+        </div>
+      </div>
     </div>
 
     <div class="setup-cta">
@@ -837,9 +879,10 @@ texture_roughness = √( Σ(lum_i − mean)² / n )</code>
 <script>
 /* ════════ STATE ════════ */
 const ST = {
-  phase:'ovulation', uv:3, hum:62, aqi:45, temp:18, cloud:50, wind:3,
+  phase:'none', uv:3, hum:62, aqi:45, temp:18, cloud:50, wind:3,
   sleep:7, stress:4, hydration:6, diet:6, concern:'Uneven texture',
   age:36, ageGroup:'33–40',
+  makeupLevel:'minimal',
   city:'', lat:null, lon:null, envLoaded:false,
   capturedDataURL:null, scores:null, autoCapture:false, faceDetected:false
 };
@@ -965,6 +1008,14 @@ function gatherInputs(){
   ST.sleep=+sleepS.value; ST.stress=+stressS.value;
   ST.hydration=+hydS.value; ST.diet=+dietS.value;
   ST.concern=concernSel.value;
+  const lvl=document.querySelector('.intensity-cell.on');
+  if(lvl) ST.makeupLevel=lvl.dataset.lv;
+}
+
+function pickIntensity(el){
+  document.querySelectorAll('.intensity-cell').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  ST.makeupLevel=el.dataset.lv;
 }
 function proceedToScan(){
   gatherInputs();
@@ -1613,7 +1664,7 @@ function renderResults(){
     {i:'🌡️',v:ST.temp+'°C',k:'Temp',warn:ST.temp>28||ST.temp<5},
     {i:'🌫️',v:ST.aqi,k:'AQI',warn:ST.aqi>70},
     {i:'☁️',v:ST.cloud+'%',k:'Cloud',warn:false},
-    {i:phaseIcon(),v:cap(ST.phase),k:'Phase',warn:ST.phase==='luteal'},
+    ...(ST.phase!=='none'?[{i:phaseIcon(),v:cap(ST.phase),k:'Phase',warn:ST.phase==='luteal'}]:[]),
     {i:'😴',v:ST.sleep+'h',k:'Sleep',warn:ST.sleep<6},
   ].map(e=>`<div class="env-cell${e.warn?' warn':''}"><span class="ev-icon">${e.i}</span><span class="ev-v">${e.v}</span><span class="ev-k">${e.k}</span></div>`).join('');
 
@@ -1664,8 +1715,9 @@ function renderResults(){
     <span class="m-badge ${m.v>=70?'b-good':m.v>=50?'b-ok':'b-low'}">${~~m.v}</span>
   </div>`).join('');
 
-  // Cycle tab
-  const cD={
+  // Cycle tab — only built when the user opted in
+  const hasCycle=ST.phase!=='none';
+  const cD=hasCycle?{
     menstrual:{icon:'🔴',title:'Menstrual · Days 1–5',state:'Sensitive & reactive',
       desc:'Lowest oestrogen and progesterone. Barrier function at its weakest — redness, dryness and reactivity are physiologically expected this week.',
       tips:['Gentle cream-to-foam cleanse — no foaming agents','Ceramide-led barrier repair is the priority','Suspend all acids, retinoids and actives','Avoid new products or procedures']},
@@ -1678,16 +1730,16 @@ function renderResults(){
     luteal:{icon:'🌙',title:'Luteal · Days 17–28',state:'Elevated sebum',
       desc:'Progesterone surges, increasing sebum production 20–30%. Pores enlarge, T-zone becomes oilier, and breakouts may emerge in week 4.',
       tips:['Salicylic-based cleanser for T-zone control','BHA toner for breakout prevention','Reduce occlusive moisturisers on nose and forehead','Zinc and omega-3 supplementation may regulate sebum']},
-  }[ST.phase];
+  }[ST.phase]:null;
 
-  const cycleTab=`<div class="cycle-content">
+  const cycleTab=hasCycle?`<div class="cycle-content">
     <div class="cycle-hd">
       <span class="cycle-icon">${cD.icon}</span>
       <div><p class="cycle-phase">${cD.title}</p><p class="cycle-state">${cD.state}</p></div>
     </div>
     <p class="cycle-desc">${cD.desc}</p>
     ${cD.tips.map(t=>`<div class="cycle-tip"><span class="ct-arrow">→</span><span class="ct-text">${t}</span></div>`).join('')}
-  </div>`;
+  </div>`:'';
 
   // Insights
   const ins=buildInsights(s);
@@ -1770,18 +1822,18 @@ function renderResults(){
   <div class="p-tabs">
     <button class="p-tab on" onclick="switchTab(this,'skin')">Skin Channels</button>
     <button class="p-tab" onclick="switchTab(this,'lifestyle')">Lifestyle</button>
-    <button class="p-tab" onclick="switchTab(this,'cycle')">Cycle · ${cap(ST.phase)}</button>
+    ${hasCycle?`<button class="p-tab" onclick="switchTab(this,'cycle')">Cycle · ${cap(ST.phase)}</button>`:''}
   </div>
   <div class="p-pane on" id="tp-skin">${skinMetrics}</div>
   <div class="p-pane" id="tp-lifestyle">${lifeMetrics}</div>
-  <div class="p-pane" id="tp-cycle">${cycleTab}</div>
+  ${hasCycle?`<div class="p-pane" id="tp-cycle">${cycleTab}</div>`:''}
 
   <!-- INSIGHTS -->
   <div class="sec-hd"><span class="sec-title">Key Insights</span><span class="sec-meta">${ins.length} signals detected</span></div>
   ${insHTML}
 
   <!-- ROUTINES -->
-  <div class="sec-hd"><span class="sec-title">Personalised Routine</span><span class="sec-meta">${cap(ST.phase)} phase · calibrated</span></div>
+  <div class="sec-hd"><span class="sec-title">Personalised Routine</span><span class="sec-meta">${hasCycle?`${cap(ST.phase)} phase · calibrated`:'Calibrated to your skin'}</span></div>
   <div class="routine-toggle">
     <button class="rt-btn on" onclick="switchRoutine(this,'am')">☀ Morning</button>
     <button class="rt-btn" onclick="switchRoutine(this,'pm')">◗ Evening</button>
@@ -1835,7 +1887,7 @@ function buildInsights(s){
   if(s.redness>50) ins.push({t:'red',text:`Elevated redness detected (R/G ratio ${s.rawRedRatio?.toFixed(2)||'—'}). The scanner flagged active inflammation in the forehead and cheek zones. Barrier-repair actives and SPF are critical. Avoid AHAs this week.`});
   else if(s.redness>30) ins.push({t:'warn',text:`Mild redness signal (R/G ratio ${s.rawRedRatio?.toFixed(2)||'—'}). Sub-clinical inflammation is present. Niacinamide 10% and azelaic acid 10% are evidence-backed for calming without sensitising.`});
   // Positives
-  if(s.radiance>=70) ins.push({t:'pos',text:`Radiance at ${s.radiance} — mean luminance is elevated, consistent with ${ST.phase==='ovulation'?'peak oestrogen':'good skin circulation and barrier integrity'}.`});
+  if(s.radiance>=70) ins.push({t:'pos',text:`Radiance at ${s.radiance} — mean luminance is elevated, consistent with good skin circulation and barrier integrity${ST.phase==='ovulation'?' and the peak-oestrogen window':''}.`});
   if(s.hydration>=65) ins.push({t:'pos',text:`Hydration proxy at ${s.hydration}. Brightness and evenness channel data are both favourable — barrier moisture levels appear intact.`});
   if(ST.sleep>=7) ins.push({t:'pos',text:`${ST.sleep}h sleep supports peak growth hormone output. Collagen synthesis and cellular repair are operating at full capacity overnight.`});
   // Environmental
@@ -2078,23 +2130,23 @@ const MAKEUP_LOOKS={
     mood:'Skin-first. A whisper of pigment, a lit-from-within finish, a single statement on the lip. Built to wear weather, work and weekday — not to hide them.',
     swatch:'linear-gradient(135deg,#F2DCC4 0%,#E0B89A 55%,#C8946F 100%)',
     steps:[
-      {n:'01',name:'Prime',em:'Prime',meta:'30 sec · Cheeks, T-zone',
+      {n:'01',name:'Prime',em:'Prime',meta:'30 sec · Cheeks, T-zone',tier:3,
         product:'Prada Refine — Blurring Extending Primer',
         desc:'A pearl-sized amount, pressed (never rubbed) into the centre of the face and outward. The polymer mesh softens texture without erasing it.',
         tip:'Wait 45 seconds before foundation. Patience here is the difference between veil and mask.'},
-      {n:'02',name:'Skin',em:'Skin',meta:'1 min · Buffed, never built up',
-        product:'Prada Reveal — Skin-Optimising Soft Matte Foundation',
+      {n:'02',name:'Skin',em:'Skin',meta:'1 min · Buffed, never built up',tier:3,
+        product:'Prada Reveal — Skin-Optimising Soft Matte Foundation (or a tinted balm if you prefer less coverage)',
         desc:'One pump, dotted across the central face. Buff outward with a damp sponge. Stop when you can still see your own skin underneath.',
         tip:'Skip the perimeter — jaw, hairline, sides of nose. Foundation is for the canvas, not the frame.'},
-      {n:'03',name:'Eye',em:'Eye',meta:'2 min · Soft definition',
+      {n:'03',name:'Eye',em:'Eye',meta:'2 min · Soft definition',tier:2,
         product:'Prada Beauty — Dimensions Multi-Effect Refillable Mascara',
         desc:'Lashes only. No liner, no shadow. The brow stays brushed-up and bare. Modernity lives in the restraint.',
         tip:'A single coat. The second coat is where editorial becomes everyday.'},
-      {n:'04',name:'Lip',em:'Lip',meta:'10 sec · The full stop',
-        product:'Prada Monochrome — Soft Matte Refillable Lipstick',
+      {n:'04',name:'Lip',em:'Lip',meta:'10 sec · The full stop',tier:2,
+        product:'Prada Monochrome — Soft Matte Refillable Lipstick (or a tinted balm)',
         desc:'Pressed straight from the bullet, then blotted once. The lip should look bitten, not painted.',
         tip:'Choose a single shade darker than your natural lip — the only point of intentional contrast.'},
-      {n:'05',name:'Finish',em:'Finish',meta:'15 sec · Set the centre only',
+      {n:'05',name:'Finish',em:'Finish',meta:'15 sec · Set the centre only',tier:4,
         product:'Prada Reset — Rebalancing Setting Powder',
         desc:'A breath of powder across the T-zone with a fluffy brush. Cheeks remain dewy. The finish is half-lit, half-matte — the Prada signature.',
         tip:'If in doubt, use less. Light should still travel through the skin.'},
@@ -2106,34 +2158,48 @@ const MAKEUP_LOOKS={
     mood:'Sculpted, considered, slow. Depth in the eye, a lacquered lip, skin that catches candlelight rather than camera flash. Designed for the hours after work.',
     swatch:'linear-gradient(135deg,#1A1410 0%,#3B2A20 50%,#7A4A38 100%)',
     steps:[
-      {n:'01',name:'Prime',em:'Prime',meta:'30 sec · Hydrate first',
+      {n:'01',name:'Prime',em:'Prime',meta:'30 sec · Hydrate first',tier:1,
         product:'Prada Augmented Skin — The Face & Eye Serum',
-        desc:'Re-press serum into the skin before makeup. Evening skin needs a second hydration layer to hold pigment.',
-        tip:'Two minutes between serum and primer. Do not rush this interval.'},
-      {n:'02',name:'Skin',em:'Skin',meta:'2 min · Buildable luminosity',
-        product:'Prada Reveal — Skin-Optimising Soft Matte Foundation',
+        desc:'Re-press serum into the skin before makeup (or as your evening skincare close). Evening skin needs a second hydration layer.',
+        tip:'Two minutes between serum and the next step. Do not rush this interval.'},
+      {n:'02',name:'Skin',em:'Skin',meta:'2 min · Buildable luminosity',tier:3,
+        product:'Prada Reveal — Skin-Optimising Soft Matte Foundation (or a tinted balm if you prefer less coverage)',
         desc:'Two pumps, layered in two passes. First pass: full face, sheer. Second pass: only where you want depth (centre forehead, chin, between brows).',
         tip:'Cream blush on the high cheekbone before powder. The order matters.'},
-      {n:'03',name:'Eye',em:'Eye',meta:'4 min · Smoked, not lined',
+      {n:'03',name:'Eye',em:'Eye',meta:'4 min · Smoked, not lined',tier:3,
         product:'Prada Beauty — Eye Quad in Cocoa or Bronzo',
         desc:'A single deep shade pressed into the lash line and smudged upward with a fingertip. No precision. The shape is a feeling, not a line.',
         tip:'Mascara last. Curl, then a single coat. The lash carries the look.'},
-      {n:'04',name:'Lip',em:'Lip',meta:'30 sec · Lacquered',
-        product:'Prada Monochrome — Hyper Matte Refillable Lipstick',
+      {n:'04',name:'Lip',em:'Lip',meta:'30 sec · Lacquered',tier:3,
+        product:'Prada Monochrome — Hyper Matte Refillable Lipstick (or a deep tinted balm)',
         desc:'Lined first with a clean brush dipped in the bullet, then filled in. A second pass. Blotted once. The edge is sharp; the surface is liquid.',
         tip:'Skip gloss. Modern lacquer comes from the formula, not the layering.'},
-      {n:'05',name:'Finish',em:'Finish',meta:'20 sec · Hold the moment',
-        product:'Prada Augmented Skin — The Mist (over makeup)',
-        desc:'A single arc, 30cm from the face. Sets the look without dulling it. The skin should look like it has just stepped in from the cold.',
+      {n:'05',name:'Finish',em:'Finish',meta:'20 sec · Hold the moment',tier:1,
+        product:'Prada Augmented Skin — The Mist',
+        desc:'A single arc, 30cm from the face. Sets skincare without dulling it (and sets makeup if you wore any). The skin should look like it has just stepped in from the cold.',
         tip:'Eyes closed. Mouth closed. One pass — never two.'},
     ],
   },
 };
 
+/* Maximum tier shown for each makeup level.
+   none=0 (skincare-only), minimal=2, refined=3, full=4 */
+const LEVEL_TIER={none:0,minimal:2,refined:3,full:4};
+const LEVEL_LABEL={
+  none:{tag:'Skincare-only',copy:'You\'ve chosen no makeup. The ritual below is your skin\'s ritual — no pigment, no obligation. Change your mind any time.'},
+  minimal:{tag:'Minimal',copy:'A single point of expression. The ritual is short by design — what you wear should feel like you, not a uniform.'},
+  refined:{tag:'Refined',copy:'Even-toned skin, a defined eye, a considered lip. Composed for any face, any gender, any day.'},
+  full:{tag:'Full editorial',copy:'Every step. Sculpted, lacquered, complete — the full Prada composition.'},
+};
+
 function buildMakeupModule(s){
   const tone=s.skinTone||{id:'F30',name:'Beige',hex:'#D6B190',sampledHex:'#D6B190'};
   const ut=s.undertone||{id:'N',label:'Neutral',desc:'Both warm and cool pigments suit you.'};
-  // Lip + blush picks driven by undertone & cycle phase
+  const level=ST.makeupLevel||'minimal';
+  const lvl=LEVEL_LABEL[level];
+  const isSkincareOnly=level==='none';
+
+  // Lip + blush picks driven by undertone
   const lipMap={
     W:{day:{name:'Honey <em>Nude</em>',code:'M·12 · Honey'},night:{name:'Burnt <em>Amber</em>',code:'H·24 · Amber'}},
     C:{day:{name:'Rose <em>Bitten</em>',code:'M·06 · Rose'},night:{name:'Plum <em>Noir</em>',code:'H·31 · Plum'}},
@@ -2141,14 +2207,16 @@ function buildMakeupModule(s){
   }[ut.id||'N'];
   const blushMap={W:'#D88A6A',C:'#D87085',N:'#C97870'}[ut.id||'N'];
 
-  return `
-  <!-- Chapter break -->
-  <div class="mu-chapter reveal">
-    <p class="mu-eyebrow"><span>Chapter II</span><span class="mu-rule"></span><span>Composition</span></p>
-    <h2 class="mu-title">The <em>look</em><br>your skin<br>is asking for.</h2>
-    <p class="mu-lede">Two routines, calibrated to the same skin. One for daylight — restraint, veil, a single point of contrast. One for the hours after — depth, lacquer, a sculpted eye. Composed with Prada Beauty.</p>
-  </div>
+  // Headline + lede flex with intensity
+  const headline=isSkincareOnly
+    ? `Your <em>ritual</em>,<br>just the skin.`
+    : `The <em>look</em><br>your skin<br>is asking for.`;
+  const lede=isSkincareOnly
+    ? 'You opted for skincare-only — no pigment, no products you didn\'t ask for. The ritual below is exactly that. The makeup looks and shade matching are tucked away; surface them whenever you like.'
+    : `Two routines, calibrated to the same skin. One for daylight, one for the hours after. Composed with Prada Beauty — at your <strong>${lvl.tag.toLowerCase()}</strong> intensity.`;
 
+  // Build the look + shade sections only when there's makeup
+  const lookSection = isSkincareOnly ? '' : `
   <!-- Look toggle -->
   <div class="look-toggle reveal" id="lookToggle">
     <button class="look-btn on" data-look="day" onclick="switchLook(this,'day')">
@@ -2165,9 +2233,10 @@ function buildMakeupModule(s){
   <!-- Shade matching -->
   <div class="sec-hd reveal" style="margin-top:0;border-top:none">
     <span class="sec-title">Shade Match</span>
-    <span class="sec-meta">Sampled from your scan</span>
+    <span class="sec-meta">Optional · sampled from your scan</span>
   </div>
   <div class="shade-block reveal">
+    <p style="font-size:10px;font-weight:300;color:var(--g50);line-height:1.6;margin-bottom:var(--s4)">Suggestions, not prescriptions. The right shade is the one you feel like wearing.</p>
     <div class="shade-row">
       <div class="shade-chip" style="background:${tone.hex}"></div>
       <div class="shade-info">
@@ -2197,7 +2266,24 @@ function buildMakeupModule(s){
       <p class="ut-name"><em>${ut.label}</em></p>
       <p class="ut-desc">${ut.desc}</p>
     </div>
+  </div>`;
+
+  // For skincare-only mode, offer a soft opt-in to reveal makeup later
+  const optInSection = isSkincareOnly ? `
+  <div class="save-rail reveal" style="border-top:var(--rule-l)">
+    <button class="save-btn" onclick="upgradeIntensity('minimal')">+ Show me a minimal look anyway</button>
+  </div>` : '';
+
+  return `
+  <!-- Chapter break -->
+  <div class="mu-chapter reveal">
+    <p class="mu-eyebrow"><span>Chapter II</span><span class="mu-rule"></span><span>${isSkincareOnly?'Your Ritual':'Composition'}</span></p>
+    <h2 class="mu-title">${headline}</h2>
+    <p class="mu-lede">${lede}</p>
   </div>
+
+  ${lookSection}
+  ${optInSection}
 
   <!-- Save / share -->
   <div class="save-rail reveal">
@@ -2205,6 +2291,12 @@ function buildMakeupModule(s){
     <button class="save-btn" onclick="shareLook()">↗ Share</button>
   </div>
   `;
+}
+
+function upgradeIntensity(lv){
+  ST.makeupLevel=lv;
+  // Re-render results to reflect the new intensity
+  renderResults();
 }
 
 let CURRENT_LOOK='day';
@@ -2328,10 +2420,9 @@ function observeReveals(scope){
 }
 
 function initMakeupModule(){
-  // Render the first look + observe reveals
-  renderLookStage(CURRENT_LOOK);
+  // Render look only when not in skincare-only mode (lookStage is absent then)
+  if(document.getElementById('lookStage')) renderLookStage(CURRENT_LOOK);
   observeReveals(document.getElementById('s-results'));
-  // Restore saved state if present
   try{
     const saved=JSON.parse(localStorage.getItem('lumina:savedLook')||'null');
     if(saved){
