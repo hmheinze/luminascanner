@@ -879,9 +879,10 @@ texture_roughness = √( Σ(lum_i − mean)² / n )</code>
 <script>
 /* ════════ STATE ════════ */
 const ST = {
-  phase:'ovulation', uv:3, hum:62, aqi:45, temp:18, cloud:50, wind:3,
+  phase:'none', uv:3, hum:62, aqi:45, temp:18, cloud:50, wind:3,
   sleep:7, stress:4, hydration:6, diet:6, concern:'Uneven texture',
   age:36, ageGroup:'33–40',
+  makeupLevel:'minimal',
   city:'', lat:null, lon:null, envLoaded:false,
   capturedDataURL:null, scores:null, autoCapture:false, faceDetected:false
 };
@@ -1007,6 +1008,14 @@ function gatherInputs(){
   ST.sleep=+sleepS.value; ST.stress=+stressS.value;
   ST.hydration=+hydS.value; ST.diet=+dietS.value;
   ST.concern=concernSel.value;
+  const lvl=document.querySelector('.intensity-cell.on');
+  if(lvl) ST.makeupLevel=lvl.dataset.lv;
+}
+
+function pickIntensity(el){
+  document.querySelectorAll('.intensity-cell').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  ST.makeupLevel=el.dataset.lv;
 }
 function proceedToScan(){
   gatherInputs();
