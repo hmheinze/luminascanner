@@ -937,6 +937,10 @@ function pickPhase(el){
   document.querySelectorAll('.phase-cell').forEach(c=>c.classList.remove('on'));
   el.classList.add('on'); ST.phase=el.dataset.p;
 }
+function pickGrooming(el){
+  document.querySelectorAll('#groomingGrid .intensity-cell').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on'); ST.grooming=el.dataset.gr;
+}
 
 /* ════════════════════════════════════
    AGE INTELLIGENCE DATABASE
