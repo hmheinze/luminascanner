@@ -744,6 +744,30 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
       </div>
     </div>
 
+    <!-- GROOMING LENS (optional, gender-inclusive) -->
+    <div class="p-sec" style="padding-bottom:var(--s3)">
+      <p class="p-sec-lbl">Grooming Lens <span style="color:var(--g30);font-weight:400;letter-spacing:.1em;text-transform:none">— optional</span></p>
+      <p style="font-size:11px;font-weight:300;color:var(--g50);line-height:1.6;margin-bottom:var(--s4)">If you have facial hair — or shave — we'll calibrate beard-line care, ingrown prevention and post-shave barrier repair to your scan. Skip if it doesn't apply.</p>
+      <div class="intensity-grid" id="groomingGrid" style="grid-template-columns:repeat(2,1fr)">
+        <div class="intensity-cell on" data-gr="off" onclick="pickGrooming(this)">
+          <span class="i-name">Skip</span>
+          <span class="i-desc">Not applicable to me right now.</span>
+        </div>
+        <div class="intensity-cell" data-gr="shaved" onclick="pickGrooming(this)">
+          <span class="i-name">Clean<br>shaved</span>
+          <span class="i-desc">Daily or near-daily shave. Post-shave care.</span>
+        </div>
+        <div class="intensity-cell" data-gr="stubble" onclick="pickGrooming(this)">
+          <span class="i-name">Stubble</span>
+          <span class="i-desc">A few days' growth. Ingrown prevention.</span>
+        </div>
+        <div class="intensity-cell" data-gr="beard" onclick="pickGrooming(this)">
+          <span class="i-name">Beard</span>
+          <span class="i-desc">Full beard. Skin under the hair, beard-line edge.</span>
+        </div>
+      </div>
+    </div>
+
     <div class="setup-cta">
       <button class="p-btn" onclick="proceedToScan()" id="scanCta">Open Live Scanner</button>
       <p id="envRequired" style="display:none;text-align:center;font-size:10px;color:#B85050;margin-top:8px;letter-spacing:.05em">Please set your location first to load environmental data</p>
@@ -883,6 +907,7 @@ const ST = {
   sleep:7, stress:4, hydration:6, diet:6, concern:'Uneven texture',
   age:36, ageGroup:'33–40',
   makeupLevel:'minimal',
+  grooming:'off', // 'off' | 'beard' | 'stubble' | 'shaved'
   city:'', lat:null, lon:null, envLoaded:false,
   capturedDataURL:null, scores:null, autoCapture:false, faceDetected:false
 };
