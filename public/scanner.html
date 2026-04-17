@@ -2307,6 +2307,46 @@ function buildMakeupModule(s){
     <button class="save-btn" onclick="upgradeIntensity('minimal')">+ Show me a minimal look anyway</button>
   </div>` : '';
 
+  // Grooming addendum — only when opted in
+  const grMap={
+    shaved:{tag:'Clean-shaven',steps:[
+      ['Pre-shave','60 sec on hydrated skin only. Warm water + a non-foaming cleanser. Never shave dry.'],
+      ['Shave','With the grain on the first pass, across on the second. A single sharp blade beats three dull ones.'],
+      ['Post-shave','Alcohol-free. Niacinamide 5% + panthenol immediately, then a thin moisturiser. SPF if AM.'],
+    ]},
+    stubble:{tag:'Stubble',steps:[
+      ['Cleanse','Gel cleanser with 2% salicylic, jaw and neck only, 2× weekly. Prevents the ingrown cycle.'],
+      ['Treat','Mandelic 5% on the perimeter on alternate evenings. Calms without stripping.'],
+      ['Hydrate','Lightweight gel-cream — heavy occlusives trap hair flat against the follicle.'],
+    ]},
+    beard:{tag:'Full beard',steps:[
+      ['Cleanse under','Work cleanser into the skin under the beard, not just the hair. Rinse fully — residue causes itch.'],
+      ['Skin layer','Hyaluronic + niacinamide serum, pressed in. Then SPF (AM) extending 2cm past the beard line.'],
+      ['Hair layer','A few drops of beard oil on the hair only, after skincare has absorbed. Comb through.'],
+    ]},
+  };
+  const groomingSection = (ST.grooming && ST.grooming!=='off' && grMap[ST.grooming]) ? `
+  <div class="sec-hd reveal" style="margin-top:0">
+    <span class="sec-title">Grooming Lens</span>
+    <span class="sec-meta">${grMap[ST.grooming].tag} · calibrated to your scan</span>
+  </div>
+  <div class="mu-steps reveal-stagger">
+    ${grMap[ST.grooming].steps.map((st,i)=>`
+      <div class="mu-step ${i===0?'open':''}" data-i="${i}" onclick="toggleStep(this)">
+        <div class="mu-step-num">G${i+1}</div>
+        <div>
+          <div class="mu-step-head">
+            <p class="mu-step-name"><em>${st[0]}</em></p>
+            <span class="mu-step-toggle">+</span>
+          </div>
+          <div class="mu-step-body">
+            <p class="mu-step-desc">${st[1]}</p>
+          </div>
+        </div>
+      </div>
+    `).join('')}
+  </div>` : '';
+
   return `
   <!-- Chapter break -->
   <div class="mu-chapter reveal">
@@ -2316,6 +2356,7 @@ function buildMakeupModule(s){
   </div>
 
   ${lookSection}
+  ${groomingSection}
   ${optInSection}
 
   <!-- Save / share -->
