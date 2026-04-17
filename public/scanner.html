@@ -2420,10 +2420,9 @@ function observeReveals(scope){
 }
 
 function initMakeupModule(){
-  // Render the first look + observe reveals
-  renderLookStage(CURRENT_LOOK);
+  // Render look only when not in skincare-only mode (lookStage is absent then)
+  if(document.getElementById('lookStage')) renderLookStage(CURRENT_LOOK);
   observeReveals(document.getElementById('s-results'));
-  // Restore saved state if present
   try{
     const saved=JSON.parse(localStorage.getItem('lumina:savedLook')||'null');
     if(saved){
