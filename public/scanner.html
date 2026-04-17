@@ -1798,6 +1798,9 @@ function renderResults(){
   <div class="trend-wrap">${trendHTML}</div>
   <p class="trend-label">Mon — Today</p>
 
+  <!-- ══════════ MAKEUP MODULE ══════════ -->
+  ${buildMakeupModule(s)}
+
   <!-- FOOTER -->
   <div class="res-footer">
     <button class="p-btn" onclick="rescan()">Scan Again</button>
@@ -1813,6 +1816,8 @@ function renderResults(){
       const w=el.dataset.w;
       setTimeout(()=>{el.style.transition='width 1.2s cubic-bezier(.16,1,.3,1)';el.style.width=w;},200);
     });
+    // Wire up makeup module: progressive reveal + interactions
+    initMakeupModule();
   },100);
 }
 
