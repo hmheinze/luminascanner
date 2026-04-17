@@ -2064,6 +2064,283 @@ function rescan(){
   show('s-welcome');
 }
 
+
+/* ════════════════════════════════════════════════════════
+   MAKEUP MODULE
+   Two looks (Daylight Veil · Nocturne), step-by-step
+   ritual, shade matching, save/share. Choreographed via
+   IntersectionObserver for AKQA-style progressive reveal.
+═══════════════════════════════════════════════════════ */
+const MAKEUP_LOOKS={
+  day:{
+    tag:'A.M. — Daylight Veil',
+    name:'Daylight <em>Veil</em>',
+    mood:'Skin-first. A whisper of pigment, a lit-from-within finish, a single statement on the lip. Built to wear weather, work and weekday — not to hide them.',
+    swatch:'linear-gradient(135deg,#F2DCC4 0%,#E0B89A 55%,#C8946F 100%)',
+    steps:[
+      {n:'01',name:'Prime',em:'Prime',meta:'30 sec · Cheeks, T-zone',
+        product:'Prada Refine — Blurring Extending Primer',
+        desc:'A pearl-sized amount, pressed (never rubbed) into the centre of the face and outward. The polymer mesh softens texture without erasing it.',
+        tip:'Wait 45 seconds before foundation. Patience here is the difference between veil and mask.'},
+      {n:'02',name:'Skin',em:'Skin',meta:'1 min · Buffed, never built up',
+        product:'Prada Reveal — Skin-Optimising Soft Matte Foundation',
+        desc:'One pump, dotted across the central face. Buff outward with a damp sponge. Stop when you can still see your own skin underneath.',
+        tip:'Skip the perimeter — jaw, hairline, sides of nose. Foundation is for the canvas, not the frame.'},
+      {n:'03',name:'Eye',em:'Eye',meta:'2 min · Soft definition',
+        product:'Prada Beauty — Dimensions Multi-Effect Refillable Mascara',
+        desc:'Lashes only. No liner, no shadow. The brow stays brushed-up and bare. Modernity lives in the restraint.',
+        tip:'A single coat. The second coat is where editorial becomes everyday.'},
+      {n:'04',name:'Lip',em:'Lip',meta:'10 sec · The full stop',
+        product:'Prada Monochrome — Soft Matte Refillable Lipstick',
+        desc:'Pressed straight from the bullet, then blotted once. The lip should look bitten, not painted.',
+        tip:'Choose a single shade darker than your natural lip — the only point of intentional contrast.'},
+      {n:'05',name:'Finish',em:'Finish',meta:'15 sec · Set the centre only',
+        product:'Prada Reset — Rebalancing Setting Powder',
+        desc:'A breath of powder across the T-zone with a fluffy brush. Cheeks remain dewy. The finish is half-lit, half-matte — the Prada signature.',
+        tip:'If in doubt, use less. Light should still travel through the skin.'},
+    ],
+  },
+  night:{
+    tag:'P.M. — Nocturne',
+    name:'<em>Nocturne</em>',
+    mood:'Sculpted, considered, slow. Depth in the eye, a lacquered lip, skin that catches candlelight rather than camera flash. Designed for the hours after work.',
+    swatch:'linear-gradient(135deg,#1A1410 0%,#3B2A20 50%,#7A4A38 100%)',
+    steps:[
+      {n:'01',name:'Prime',em:'Prime',meta:'30 sec · Hydrate first',
+        product:'Prada Augmented Skin — The Face & Eye Serum',
+        desc:'Re-press serum into the skin before makeup. Evening skin needs a second hydration layer to hold pigment.',
+        tip:'Two minutes between serum and primer. Do not rush this interval.'},
+      {n:'02',name:'Skin',em:'Skin',meta:'2 min · Buildable luminosity',
+        product:'Prada Reveal — Skin-Optimising Soft Matte Foundation',
+        desc:'Two pumps, layered in two passes. First pass: full face, sheer. Second pass: only where you want depth (centre forehead, chin, between brows).',
+        tip:'Cream blush on the high cheekbone before powder. The order matters.'},
+      {n:'03',name:'Eye',em:'Eye',meta:'4 min · Smoked, not lined',
+        product:'Prada Beauty — Eye Quad in Cocoa or Bronzo',
+        desc:'A single deep shade pressed into the lash line and smudged upward with a fingertip. No precision. The shape is a feeling, not a line.',
+        tip:'Mascara last. Curl, then a single coat. The lash carries the look.'},
+      {n:'04',name:'Lip',em:'Lip',meta:'30 sec · Lacquered',
+        product:'Prada Monochrome — Hyper Matte Refillable Lipstick',
+        desc:'Lined first with a clean brush dipped in the bullet, then filled in. A second pass. Blotted once. The edge is sharp; the surface is liquid.',
+        tip:'Skip gloss. Modern lacquer comes from the formula, not the layering.'},
+      {n:'05',name:'Finish',em:'Finish',meta:'20 sec · Hold the moment',
+        product:'Prada Augmented Skin — The Mist (over makeup)',
+        desc:'A single arc, 30cm from the face. Sets the look without dulling it. The skin should look like it has just stepped in from the cold.',
+        tip:'Eyes closed. Mouth closed. One pass — never two.'},
+    ],
+  },
+};
+
+function buildMakeupModule(s){
+  const tone=s.skinTone||{id:'F30',name:'Beige',hex:'#D6B190',sampledHex:'#D6B190'};
+  const ut=s.undertone||{id:'N',label:'Neutral',desc:'Both warm and cool pigments suit you.'};
+  // Lip + blush picks driven by undertone & cycle phase
+  const lipMap={
+    W:{day:{name:'Honey <em>Nude</em>',code:'M·12 · Honey'},night:{name:'Burnt <em>Amber</em>',code:'H·24 · Amber'}},
+    C:{day:{name:'Rose <em>Bitten</em>',code:'M·06 · Rose'},night:{name:'Plum <em>Noir</em>',code:'H·31 · Plum'}},
+    N:{day:{name:'Soft <em>Terracotta</em>',code:'M·09 · Terra'},night:{name:'Aubergine <em>Velvet</em>',code:'H·27 · Aubergine'}},
+  }[ut.id||'N'];
+  const blushMap={W:'#D88A6A',C:'#D87085',N:'#C97870'}[ut.id||'N'];
+
+  return `
+  <!-- Chapter break -->
+  <div class="mu-chapter reveal">
+    <p class="mu-eyebrow"><span>Chapter II</span><span class="mu-rule"></span><span>Composition</span></p>
+    <h2 class="mu-title">The <em>look</em><br>your skin<br>is asking for.</h2>
+    <p class="mu-lede">Two routines, calibrated to the same skin. One for daylight — restraint, veil, a single point of contrast. One for the hours after — depth, lacquer, a sculpted eye. Composed with Prada Beauty.</p>
+  </div>
+
+  <!-- Look toggle -->
+  <div class="look-toggle reveal" id="lookToggle">
+    <button class="look-btn on" data-look="day" onclick="switchLook(this,'day')">
+      <span class="lk-tag">A.M.</span><span class="lk-name">Daylight <em>Veil</em></span>
+    </button>
+    <button class="look-btn" data-look="night" onclick="switchLook(this,'night')">
+      <span class="lk-tag">P.M.</span><span class="lk-name"><em>Nocturne</em></span>
+    </button>
+  </div>
+
+  <!-- Look mood + steps -->
+  <div id="lookStage"></div>
+
+  <!-- Shade matching -->
+  <div class="sec-hd reveal" style="margin-top:0;border-top:none">
+    <span class="sec-title">Shade Match</span>
+    <span class="sec-meta">Sampled from your scan</span>
+  </div>
+  <div class="shade-block reveal">
+    <div class="shade-row">
+      <div class="shade-chip" style="background:${tone.hex}"></div>
+      <div class="shade-info">
+        <p class="sh-cat">Prada Reveal — Foundation</p>
+        <p class="sh-name">${tone.name}</p>
+        <p class="sh-code">${tone.id} · ${ut.label} undertone</p>
+      </div>
+    </div>
+    <div class="shade-row">
+      <div class="shade-chip" style="background:${blushMap}"></div>
+      <div class="shade-info">
+        <p class="sh-cat">Prada Monochrome — Cream Blush</p>
+        <p class="sh-name">${ut.id==='W'?'Sun-warmed <em>Apricot</em>':ut.id==='C'?'Cool <em>Petal</em>':'Soft <em>Coral</em>'}</p>
+        <p class="sh-code">B·${ut.id==='W'?'04':ut.id==='C'?'02':'07'} · ${ut.label} undertone</p>
+      </div>
+    </div>
+    <div class="shade-row">
+      <div class="shade-chip" id="lipChip" style="background:${ut.id==='W'?'#A85C3E':ut.id==='C'?'#9B3A4F':'#A04A40'}"></div>
+      <div class="shade-info">
+        <p class="sh-cat">Prada Monochrome — Lipstick (Daylight)</p>
+        <p class="sh-name" id="lipName">${lipMap.day.name}</p>
+        <p class="sh-code" id="lipCode">${lipMap.day.code} · ${ut.label} undertone</p>
+      </div>
+    </div>
+    <div class="undertone-card">
+      <p class="ut-lbl">Your Undertone</p>
+      <p class="ut-name"><em>${ut.label}</em></p>
+      <p class="ut-desc">${ut.desc}</p>
+    </div>
+  </div>
+
+  <!-- Save / share -->
+  <div class="save-rail reveal">
+    <button class="save-btn" id="saveLookBtn" onclick="saveLook()">◐ Save Routine</button>
+    <button class="save-btn" onclick="shareLook()">↗ Share</button>
+  </div>
+  `;
+}
+
+let CURRENT_LOOK='day';
+let CURRENT_UNDERTONE='N';
+function switchLook(btn,key){
+  if(key===CURRENT_LOOK) return;
+  document.querySelectorAll('.look-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  CURRENT_LOOK=key;
+  renderLookStage(key);
+  // Update lip recommendation chip too
+  const ut=(ST.scores&&ST.scores.undertone)||{id:'N',label:'Neutral'};
+  const lipMap={
+    W:{day:{name:'Honey <em>Nude</em>',code:'M·12 · Honey',hex:'#A85C3E'},night:{name:'Burnt <em>Amber</em>',code:'H·24 · Amber',hex:'#7A3220'}},
+    C:{day:{name:'Rose <em>Bitten</em>',code:'M·06 · Rose',hex:'#9B3A4F'},night:{name:'Plum <em>Noir</em>',code:'H·31 · Plum',hex:'#4E1F2E'}},
+    N:{day:{name:'Soft <em>Terracotta</em>',code:'M·09 · Terra',hex:'#A04A40'},night:{name:'Aubergine <em>Velvet</em>',code:'H·27 · Aubergine',hex:'#3F1F2E'}},
+  }[ut.id||'N'];
+  const pick=lipMap[key];
+  const chip=document.getElementById('lipChip');
+  const nm=document.getElementById('lipName');
+  const cd=document.getElementById('lipCode');
+  if(chip)chip.style.background=pick.hex;
+  if(nm)nm.innerHTML=pick.name;
+  if(cd)cd.textContent=`${pick.code} · ${ut.label} undertone`;
+  // Update label "Lipstick (Daylight/Evening)"
+  const cat=document.querySelector('#lipName')?.parentElement?.querySelector('.sh-cat');
+  if(cat)cat.textContent=`Prada Monochrome — Lipstick (${key==='day'?'Daylight':'Evening'})`;
+}
+
+function renderLookStage(key){
+  const L=MAKEUP_LOOKS[key];
+  const stage=document.getElementById('lookStage');
+  if(!stage) return;
+  stage.innerHTML=`
+    <div class="look-mood reveal">
+      <div class="mood-swatch" style="background:${L.swatch}"></div>
+      <p class="mood-text"><strong>${L.tag}.</strong> ${L.mood}</p>
+    </div>
+    <div class="mu-steps reveal-stagger" id="muSteps">
+      ${L.steps.map((st,i)=>`
+        <div class="mu-step ${i===0?'open':''}" data-i="${i}" onclick="toggleStep(this)">
+          <div class="mu-step-num">${st.n}</div>
+          <div>
+            <div class="mu-step-head">
+              <p class="mu-step-name">${st.em? `<em>${st.name}</em>` : st.name}</p>
+              <span class="mu-step-toggle">+</span>
+            </div>
+            <p class="mu-step-meta">${st.meta}</p>
+            <div class="mu-step-body">
+              <p class="mu-step-product">${st.product}</p>
+              <p class="mu-step-desc">${st.desc}</p>
+              <p class="mu-step-tip">— ${st.tip}</p>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  // Re-observe newly inserted reveal elements
+  observeReveals(stage);
+}
+
+function toggleStep(el){
+  const wasOpen=el.classList.contains('open');
+  // Close siblings for a clean focus state (one card at a time)
+  el.parentElement.querySelectorAll('.mu-step').forEach(s=>s.classList.remove('open'));
+  if(!wasOpen) el.classList.add('open');
+}
+
+function saveLook(){
+  try{
+    const payload={
+      savedAt:new Date().toISOString(),
+      look:CURRENT_LOOK,
+      tone:ST.scores?.skinTone||null,
+      undertone:ST.scores?.undertone||null,
+      overall:ST.scores?.overall||null,
+    };
+    localStorage.setItem('lumina:savedLook',JSON.stringify(payload));
+    const btn=document.getElementById('saveLookBtn');
+    if(btn){btn.classList.add('is-saved');btn.textContent='● Saved';}
+    showToast('Routine saved');
+  }catch(e){ showToast('Could not save'); }
+}
+
+async function shareLook(){
+  const L=MAKEUP_LOOKS[CURRENT_LOOK];
+  const tone=ST.scores?.skinTone;
+  const text=`My Lumina look: ${L.tag}. Foundation match: ${tone?.id||''} ${tone?.name||''}. Built with Prada Beauty.`;
+  if(navigator.share){
+    try{ await navigator.share({title:'Lumina × Prada Beauty',text}); return; }catch(e){}
+  }
+  try{ await navigator.clipboard.writeText(text); showToast('Copied to clipboard'); }
+  catch(e){ showToast('Share unavailable'); }
+}
+
+function showToast(msg){
+  let t=document.getElementById('saveToast');
+  if(!t){t=document.createElement('div');t.id='saveToast';t.className='save-toast';document.body.appendChild(t);}
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+/* ════════ PROGRESSIVE REVEAL ════════ */
+let _revealObserver=null;
+function getRevealObserver(){
+  if(_revealObserver) return _revealObserver;
+  _revealObserver=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.classList.add('in');
+        _revealObserver.unobserve(e.target);
+      }
+    });
+  },{root:document.getElementById('s-results'),rootMargin:'0px 0px -8% 0px',threshold:0.08});
+  return _revealObserver;
+}
+function observeReveals(scope){
+  const obs=getRevealObserver();
+  (scope||document).querySelectorAll('.reveal:not(.in),.reveal-stagger:not(.in)').forEach(el=>obs.observe(el));
+}
+
+function initMakeupModule(){
+  // Render the first look + observe reveals
+  renderLookStage(CURRENT_LOOK);
+  observeReveals(document.getElementById('s-results'));
+  // Restore saved state if present
+  try{
+    const saved=JSON.parse(localStorage.getItem('lumina:savedLook')||'null');
+    if(saved){
+      const btn=document.getElementById('saveLookBtn');
+      if(btn){btn.classList.add('is-saved');btn.textContent='● Saved';}
+    }
+  }catch(e){}
+}
+
 // Init — set all non-active screens to display:none
 document.querySelectorAll('.screen:not(.active)').forEach(s=>s.style.display='none');
 </script>
