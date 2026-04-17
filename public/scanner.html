@@ -2410,7 +2410,7 @@ function renderLookStage(key){
       <p class="mood-text"><strong>${L.tag}.</strong> ${L.mood}</p>
     </div>
     <div class="mu-steps reveal-stagger" id="muSteps">
-      ${L.steps.map((st,i)=>`
+      ${L.steps.filter(st=>(st.tier||4) <= (LEVEL_TIER[ST.makeupLevel]||4)).map((st,i,a)=>`
         <div class="mu-step ${i===0?'open':''}" data-i="${i}" onclick="toggleStep(this)">
           <div class="mu-step-num">${st.n}</div>
           <div>
