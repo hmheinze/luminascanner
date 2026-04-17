@@ -1927,8 +1927,12 @@ function buildInsights(s){
   if(s.darkCircles<55) ins.push({t:'act',text:`Under-eye luminance delta is significant (score: ${s.darkCircles}). The scanner detected a notable brightness drop in the periorbital zone. Caffeine peptides, cold application, and head elevation during sleep all have clinical evidence.`});
   if(s.texture<55) ins.push({t:'act',text:`Texture roughness is elevated in the T-zone (score: ${s.texture}). Local luminance variance suggests surface congestion or enlarged pores. Mandelic acid 2–3× weekly has 4-week clinical evidence for smoothing.`});
   if(s.barrier<50) ins.push({t:'act',text:`Barrier health score of ${s.barrier} reflects combined stress, UV, age (${aD.group}), and lifestyle signals. ${aD.group==='51+'?'Ceramide complex + squalane + a rich occlusive is the evidence-backed protocol.':'Ceramide I, II, III complex and squalane are the two most-evidence-backed barrier repair actives.'}`});
+  // Grooming Lens — only if user opted in
+  if(ST.grooming==='shaved') ins.push({t:'act',text:`Grooming lens — clean-shaven: a daily shave compromises the acid mantle. Cleanse with lukewarm water, shave on hydrated skin (never dry), and follow with an alcohol-free post-shave layer. Your barrier score (${s.barrier}) and redness (${s.redness}) suggest niacinamide + panthenol immediately after shaving.`});
+  if(ST.grooming==='stubble') ins.push({t:'act',text:`Grooming lens — stubble: ingrown follicles thrive at 2–5 days of growth. A 2× weekly BHA (salicylic 2%) along the jaw and neck, plus mandelic acid on the perimeter, prevents the cycle. Avoid heavy occlusives directly on the stubble line.`});
+  if(ST.grooming==='beard') ins.push({t:'act',text:`Grooming lens — full beard: skin under the beard still needs cleansing and SPF. A lightweight serum (hyaluronic + niacinamide) worked into the skin under the hair, then beard oil on the hair itself. The beard line is where most barrier damage hides — extend skincare 2cm past the edge.`});
   if(ins.length===1) ins.push({t:'pos',text:'All skin channels are within balanced range. Maintain consistency and rescan in 7 days to track trend data.'});
-  return ins.slice(0,6);
+  return ins.slice(0,7);
 }
 
 /* ════════ AM RITUAL ════════ */
