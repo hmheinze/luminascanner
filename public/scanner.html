@@ -1887,7 +1887,7 @@ function buildInsights(s){
   if(s.redness>50) ins.push({t:'red',text:`Elevated redness detected (R/G ratio ${s.rawRedRatio?.toFixed(2)||'—'}). The scanner flagged active inflammation in the forehead and cheek zones. Barrier-repair actives and SPF are critical. Avoid AHAs this week.`});
   else if(s.redness>30) ins.push({t:'warn',text:`Mild redness signal (R/G ratio ${s.rawRedRatio?.toFixed(2)||'—'}). Sub-clinical inflammation is present. Niacinamide 10% and azelaic acid 10% are evidence-backed for calming without sensitising.`});
   // Positives
-  if(s.radiance>=70) ins.push({t:'pos',text:`Radiance at ${s.radiance} — mean luminance is elevated, consistent with ${ST.phase==='ovulation'?'peak oestrogen':'good skin circulation and barrier integrity'}.`.replace('peak oestrogen', ST.phase==='ovulation'?'peak oestrogen':'good skin circulation and barrier integrity'))});
+  if(s.radiance>=70) ins.push({t:'pos',text:`Radiance at ${s.radiance} — mean luminance is elevated, consistent with good skin circulation and barrier integrity${ST.phase==='ovulation'?' and the peak-oestrogen window':''}.`});
   if(s.hydration>=65) ins.push({t:'pos',text:`Hydration proxy at ${s.hydration}. Brightness and evenness channel data are both favourable — barrier moisture levels appear intact.`});
   if(ST.sleep>=7) ins.push({t:'pos',text:`${ST.sleep}h sleep supports peak growth hormone output. Collagen synthesis and cellular repair are operating at full capacity overnight.`});
   // Environmental
