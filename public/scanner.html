@@ -1664,7 +1664,7 @@ function renderResults(){
     {i:'🌡️',v:ST.temp+'°C',k:'Temp',warn:ST.temp>28||ST.temp<5},
     {i:'🌫️',v:ST.aqi,k:'AQI',warn:ST.aqi>70},
     {i:'☁️',v:ST.cloud+'%',k:'Cloud',warn:false},
-    {i:phaseIcon(),v:cap(ST.phase),k:'Phase',warn:ST.phase==='luteal'},
+    ...(ST.phase!=='none'?[{i:phaseIcon(),v:cap(ST.phase),k:'Phase',warn:ST.phase==='luteal'}]:[]),
     {i:'😴',v:ST.sleep+'h',k:'Sleep',warn:ST.sleep<6},
   ].map(e=>`<div class="env-cell${e.warn?' warn':''}"><span class="ev-icon">${e.i}</span><span class="ev-v">${e.v}</span><span class="ev-k">${e.k}</span></div>`).join('');
 
@@ -1715,8 +1715,9 @@ function renderResults(){
     <span class="m-badge ${m.v>=70?'b-good':m.v>=50?'b-ok':'b-low'}">${~~m.v}</span>
   </div>`).join('');
 
-  // Cycle tab
-  const cD={
+  // Cycle tab — only built when the user opted in
+  const hasCycle=ST.phase!=='none';
+  const cD=hasCycle?{
     menstrual:{icon:'🔴',title:'Menstrual · Days 1–5',state:'Sensitive & reactive',
       desc:'Lowest oestrogen and progesterone. Barrier function at its weakest — redness, dryness and reactivity are physiologically expected this week.',
       tips:['Gentle cream-to-foam cleanse — no foaming agents','Ceramide-led barrier repair is the priority','Suspend all acids, retinoids and actives','Avoid new products or procedures']},
@@ -1729,16 +1730,16 @@ function renderResults(){
     luteal:{icon:'🌙',title:'Luteal · Days 17–28',state:'Elevated sebum',
       desc:'Progesterone surges, increasing sebum production 20–30%. Pores enlarge, T-zone becomes oilier, and breakouts may emerge in week 4.',
       tips:['Salicylic-based cleanser for T-zone control','BHA toner for breakout prevention','Reduce occlusive moisturisers on nose and forehead','Zinc and omega-3 supplementation may regulate sebum']},
-  }[ST.phase];
+  }[ST.phase]:null;
 
-  const cycleTab=`<div class="cycle-content">
+  const cycleTab=hasCycle?`<div class="cycle-content">
     <div class="cycle-hd">
       <span class="cycle-icon">${cD.icon}</span>
       <div><p class="cycle-phase">${cD.title}</p><p class="cycle-state">${cD.state}</p></div>
     </div>
     <p class="cycle-desc">${cD.desc}</p>
     ${cD.tips.map(t=>`<div class="cycle-tip"><span class="ct-arrow">→</span><span class="ct-text">${t}</span></div>`).join('')}
-  </div>`;
+  </div>`:'';
 
   // Insights
   const ins=buildInsights(s);
@@ -1821,18 +1822,18 @@ function renderResults(){
   <div class="p-tabs">
     <button class="p-tab on" onclick="switchTab(this,'skin')">Skin Channels</button>
     <button class="p-tab" onclick="switchTab(this,'lifestyle')">Lifestyle</button>
-    <button class="p-tab" onclick="switchTab(this,'cycle')">Cycle · ${cap(ST.phase)}</button>
+    ${hasCycle?`<button class="p-tab" onclick="switchTab(this,'cycle')">Cycle · ${cap(ST.phase)}</button>`:''}
   </div>
   <div class="p-pane on" id="tp-skin">${skinMetrics}</div>
   <div class="p-pane" id="tp-lifestyle">${lifeMetrics}</div>
-  <div class="p-pane" id="tp-cycle">${cycleTab}</div>
+  ${hasCycle?`<div class="p-pane" id="tp-cycle">${cycleTab}</div>`:''}
 
   <!-- INSIGHTS -->
   <div class="sec-hd"><span class="sec-title">Key Insights</span><span class="sec-meta">${ins.length} signals detected</span></div>
   ${insHTML}
 
   <!-- ROUTINES -->
-  <div class="sec-hd"><span class="sec-title">Personalised Routine</span><span class="sec-meta">${cap(ST.phase)} phase · calibrated</span></div>
+  <div class="sec-hd"><span class="sec-title">Personalised Routine</span><span class="sec-meta">${hasCycle?`${cap(ST.phase)} phase · calibrated`:'Calibrated to your skin'}</span></div>
   <div class="routine-toggle">
     <button class="rt-btn on" onclick="switchRoutine(this,'am')">☀ Morning</button>
     <button class="rt-btn" onclick="switchRoutine(this,'pm')">◗ Evening</button>
