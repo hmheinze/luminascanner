@@ -2555,20 +2555,216 @@ function toggleStep(el){
   if(!wasOpen) el.classList.add('open');
 }
 
-function saveLook(){
+/* ════════ ARCHIVE / HISTORY ════════
+   Stores compact snapshots of past scans in localStorage.
+   AKQA: progressive disclosure — index shows only essentials,
+   tap re-hydrates the full reading as the secondary detailed view.
+════════════════════════════════ */
+const ARCHIVE_KEY='lumina:history';
+const ARCHIVE_MAX=12;
+
+function downsampleThumb(dataUrl, size=140){
+  return new Promise(resolve=>{
+    if(!dataUrl){resolve(null);return;}
+    try{
+      const img=new Image();
+      img.onload=()=>{
+        const c=document.createElement('canvas');
+        const ratio=img.height/img.width||1;
+        c.width=size; c.height=Math.round(size*ratio);
+        const ctx=c.getContext('2d');
+        ctx.drawImage(img,0,0,c.width,c.height);
+        resolve(c.toDataURL('image/jpeg',.78));
+      };
+      img.onerror=()=>resolve(null);
+      img.src=dataUrl;
+    }catch(e){resolve(null);}
+  });
+}
+
+function loadArchive(){
   try{
-    const payload={
+    const raw=localStorage.getItem(ARCHIVE_KEY);
+    if(!raw) return [];
+    const arr=JSON.parse(raw);
+    return Array.isArray(arr)?arr:[];
+  }catch(e){return [];}
+}
+
+function persistArchive(list){
+  try{ localStorage.setItem(ARCHIVE_KEY,JSON.stringify(list)); }catch(e){}
+}
+
+async function saveLook(){
+  try{
+    const thumb=await downsampleThumb(ST.capturedDataURL,140);
+    const entry={
+      id:'sc_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
       savedAt:new Date().toISOString(),
       look:CURRENT_LOOK,
-      tone:ST.scores?.skinTone||null,
-      undertone:ST.scores?.undertone||null,
-      overall:ST.scores?.overall||null,
+      makeupLevel:ST.makeupLevel,
+      grooming:ST.grooming,
+      phase:ST.phase,
+      age:ST.age,
+      ageGroup:ST.ageGroup,
+      sleep:ST.sleep, stress:ST.stress, hydration:ST.hydration, diet:ST.diet,
+      concern:ST.concern,
+      city:ST.city,
+      env:{uv:ST.uv,hum:ST.hum,temp:ST.temp,aqi:ST.aqi,cloud:ST.cloud,wind:ST.wind},
+      scores:ST.scores||null,
+      thumb,
     };
-    localStorage.setItem('lumina:savedLook',JSON.stringify(payload));
+    const list=loadArchive();
+    // de-dupe: if a save happened in the last 30s, replace the most recent entry
+    if(list.length && (Date.now()-new Date(list[0].savedAt).getTime()<30000)){
+      list[0]=entry;
+    }else{
+      list.unshift(entry);
+    }
+    while(list.length>ARCHIVE_MAX) list.pop();
+    persistArchive(list);
     const btn=document.getElementById('saveLookBtn');
-    if(btn){btn.classList.add('is-saved');btn.textContent='● Saved';}
-    showToast('Routine saved');
+    if(btn){btn.classList.add('is-saved');btn.textContent='● Saved to Archive';}
+    refreshWelcomeArchiveLink();
+    showToast('Saved to your archive');
   }catch(e){ showToast('Could not save'); }
+}
+
+function refreshWelcomeArchiveLink(){
+  const link=document.getElementById('welcomeArchiveLink');
+  const count=document.getElementById('welcomeArchiveCount');
+  if(!link||!count) return;
+  const list=loadArchive();
+  if(list.length>0){
+    link.classList.add('show');
+    count.textContent=list.length===1?'1 reading':`${list.length} readings`;
+  }else{
+    link.classList.remove('show');
+  }
+}
+
+function fmtDate(iso){
+  try{
+    const d=new Date(iso);
+    const day=d.getDate();
+    const mon=d.toLocaleString('en-GB',{month:'short'}).toUpperCase();
+    const yr=d.getFullYear();
+    const time=d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    return {day,mon,yr,time,full:`${day} ${mon} ${yr} · ${time}`};
+  }catch(e){return {day:'—',mon:'',yr:'',time:'',full:iso};}
+}
+
+function gradeFromScore(O){
+  if(O>=80) return {g:'Luminous',e:'luminous'};
+  if(O>=65) return {g:'Radiant',e:'radiant'};
+  if(O>=50) return {g:'Balanced',e:'balanced'};
+  if(O>=35) return {g:'Needs <em>care</em>',e:'attention'};
+  return {g:'At <em>rest</em>',e:'rest'};
+}
+
+function openArchive(){
+  renderArchive();
+  show('s-archive');
+}
+
+function renderArchive(){
+  const list=loadArchive();
+  const wrap=document.getElementById('archiveList');
+  const lbl=document.getElementById('archiveCountLabel');
+  const clearBtn=document.getElementById('archiveClearBtn');
+  if(lbl) lbl.textContent=list.length===0?'Empty':(list.length===1?'1 entry':`${list.length} entries`);
+  if(clearBtn) clearBtn.style.display=list.length?'':'none';
+  if(!wrap) return;
+  if(list.length===0){
+    wrap.innerHTML=`
+      <div class="ar-empty">
+        <div class="ar-empty-mark">∅</div>
+        <p>No <em>readings</em> yet</p>
+        <span>Once you save a scan, it will live here. Your full analysis stays one tap away — never on the surface.</span>
+      </div>`;
+    return;
+  }
+  wrap.innerHTML=list.map((e,i)=>{
+    const O=e.scores?.overall||0;
+    const gr=gradeFromScore(O);
+    const tone=e.scores?.skinTone;
+    const ut=e.scores?.undertone;
+    const d=fmtDate(e.savedAt);
+    const idx=String(list.length-i).padStart(2,'0');
+    const thumb=e.thumb
+      ? `<img class="ar-card-thumb" src="${e.thumb}" alt="">`
+      : `<div class="ar-card-thumb empty">∅</div>`;
+    const toneChip=tone?`<span class="ar-card-tone" style="background:${tone.hex||'#C8A88C'}"></span>${tone.id||''}`:'';
+    return `
+      <button class="ar-card" onclick="openArchiveEntry('${e.id}')" aria-label="Open scan from ${d.full}">
+        ${thumb}
+        <div class="ar-card-body">
+          <span class="ar-card-idx">№ ${idx} · ${d.day} ${d.mon}</span>
+          <span class="ar-card-grade">${gr.g}</span>
+          <span class="ar-card-meta">
+            ${toneChip?`<span>${toneChip}</span><span class="dot"></span>`:''}
+            <span>${d.time}</span>
+            ${e.city?`<span class="dot"></span><span>${(e.city||'').split(',')[0]}</span>`:''}
+            ${e.makeupLevel&&e.makeupLevel!=='none'?`<span class="dot"></span><span>${e.makeupLevel}</span>`:''}
+          </span>
+        </div>
+        <div class="ar-card-right">
+          <span class="ar-card-num">${O||'—'}</span>
+          <span class="ar-card-cta">Open →</span>
+        </div>
+      </button>`;
+  }).join('');
+}
+
+function openArchiveEntry(id){
+  const list=loadArchive();
+  const e=list.find(x=>x.id===id);
+  if(!e){ showToast('Entry not found'); return; }
+  // Re-hydrate ST so renderResults works exactly as live
+  ST.scores=e.scores;
+  ST.capturedDataURL=e.thumb||ST.capturedDataURL;
+  ST.makeupLevel=e.makeupLevel||'minimal';
+  ST.grooming=e.grooming||'off';
+  ST.phase=e.phase||'none';
+  ST.age=e.age||ST.age;
+  ST.ageGroup=e.ageGroup||ST.ageGroup;
+  ST.sleep=e.sleep??ST.sleep;
+  ST.stress=e.stress??ST.stress;
+  ST.hydration=e.hydration??ST.hydration;
+  ST.diet=e.diet??ST.diet;
+  ST.concern=e.concern||ST.concern;
+  ST.city=e.city||ST.city;
+  if(e.env){
+    ST.uv=e.env.uv; ST.hum=e.env.hum; ST.temp=e.env.temp;
+    ST.aqi=e.env.aqi; ST.cloud=e.env.cloud; ST.wind=e.env.wind;
+  }
+  ST._viewingArchived=e;
+  CURRENT_LOOK=e.look||'day';
+  renderResults();
+  show('s-results');
+  // Inject archived banner at top of results body
+  const body=document.querySelector('#s-results .res-body');
+  if(body && !body.querySelector('.archived-banner')){
+    const b=document.createElement('div');
+    b.className='archived-banner reveal in';
+    b.innerHTML=`
+      <span>Archived · <em>${fmtDate(e.savedAt).full}</em></span>
+      <button onclick="exitArchivedView()">Close</button>`;
+    body.insertBefore(b, body.firstChild);
+  }
+}
+
+function exitArchivedView(){
+  ST._viewingArchived=null;
+  openArchive();
+}
+
+function clearArchive(){
+  if(!confirm('Clear all saved scans? This cannot be undone.')) return;
+  persistArchive([]);
+  refreshWelcomeArchiveLink();
+  renderArchive();
+  showToast('Archive cleared');
 }
 
 async function shareLook(){
@@ -2609,17 +2805,26 @@ function observeReveals(scope){
 }
 
 function initMakeupModule(){
-  // Render look only when not in skincare-only mode (lookStage is absent then)
   if(document.getElementById('lookStage')) renderLookStage(CURRENT_LOOK);
   observeReveals(document.getElementById('s-results'));
-  try{
-    const saved=JSON.parse(localStorage.getItem('lumina:savedLook')||'null');
-    if(saved){
-      const btn=document.getElementById('saveLookBtn');
-      if(btn){btn.classList.add('is-saved');btn.textContent='● Saved';}
+  // If we just rendered fresh results (not viewing an archived entry),
+  // clear the archived banner placeholder.
+  if(!ST._viewingArchived){
+    document.querySelectorAll('#s-results .archived-banner').forEach(b=>b.remove());
+  }
+  // Reset save button state per-render based on whether the *current* scan was already archived.
+  const btn=document.getElementById('saveLookBtn');
+  if(btn){
+    if(ST._viewingArchived){
+      btn.classList.add('is-saved'); btn.textContent='● Archived';
+    }else{
+      btn.classList.remove('is-saved'); btn.textContent='◐ Save to Archive';
     }
-  }catch(e){}
+  }
 }
+
+// Refresh the welcome archive link on first paint
+refreshWelcomeArchiveLink();
 
 // Init — set all non-active screens to display:none
 document.querySelectorAll('.screen:not(.active)').forEach(s=>s.style.display='none');
