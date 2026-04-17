@@ -93,6 +93,7 @@ button{cursor:pointer}
 .p-sec{border-top:var(--rule-l);padding:var(--s6)}
 .p-sec-lbl{font-size:9px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--g50);margin-bottom:var(--s5)}
 .phase-grid{display:grid;grid-template-columns:repeat(4,1fr);border:var(--rule-l)}
+.phase-grid-5{grid-template-columns:repeat(5,1fr)}
 .phase-cell{padding:var(--s4) var(--s2);text-align:center;cursor:pointer;border-right:var(--rule-l);
   transition:background .15s;background:var(--white)}
 .phase-cell:last-child{border-right:none}
@@ -101,6 +102,21 @@ button{cursor:pointer}
 .phase-cell span:first-child{display:block;font-size:18px;margin-bottom:4px}
 .phase-cell span:last-child{font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--g50)}
 .phase-cell.on span:last-child{color:rgba(255,255,255,.65)}
+
+/* Makeup intensity selector */
+.intensity-grid{display:grid;grid-template-columns:1fr 1fr;border:var(--rule-l)}
+.intensity-cell{padding:var(--s4);cursor:pointer;border-right:var(--rule-l);border-bottom:var(--rule-l);
+  background:var(--white);transition:background .25s ease,color .25s ease;text-align:left}
+.intensity-cell:nth-child(2n){border-right:none}
+.intensity-cell:nth-child(n+3){border-bottom:none}
+.intensity-cell:hover{background:var(--g05)}
+.intensity-cell.on{background:var(--black)}
+.intensity-cell .i-name{display:block;font-family:var(--serif);font-size:15px;font-weight:400;
+  color:var(--black);line-height:1.15;margin-bottom:6px;letter-spacing:-.005em}
+.intensity-cell.on .i-name{color:var(--white)}
+.intensity-cell .i-desc{display:block;font-size:9px;font-weight:300;color:var(--g50);
+  line-height:1.5;letter-spacing:.02em}
+.intensity-cell.on .i-desc{color:rgba(255,255,255,.55)}
 .sl-row{display:flex;align-items:center;gap:var(--s4);padding:var(--s3) 0;border-bottom:var(--rule-l)}
 .sl-row:last-child{border-bottom:none}
 .sl-lbl{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--black);min-width:80px}
