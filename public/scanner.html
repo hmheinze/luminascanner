@@ -648,13 +648,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
       </div>
     </div>
 
-    <!-- CYCLE -->
+    <!-- HORMONAL RHYTHM (optional, inclusive) -->
     <div class="p-sec">
-      <p class="p-sec-lbl">Cycle Phase</p>
-      <div class="phase-grid" id="phaseGrid">
+      <p class="p-sec-lbl">Hormonal Rhythm <span style="color:var(--g30);font-weight:400;letter-spacing:.1em;text-transform:none">— optional</span></p>
+      <p style="font-size:11px;font-weight:300;color:var(--g50);line-height:1.6;margin-bottom:var(--s4)">If your body has a monthly cycle and you'd like the scan calibrated to it, choose where you are. If this doesn't apply to you, skip — your results will be just as accurate.</p>
+      <div class="phase-grid phase-grid-5" id="phaseGrid">
+        <div class="phase-cell on" data-p="none" onclick="pickPhase(this)"><span>◯</span><span>Skip</span></div>
         <div class="phase-cell" data-p="menstrual" onclick="pickPhase(this)"><span>🔴</span><span>Menstrual</span></div>
         <div class="phase-cell" data-p="follicular" onclick="pickPhase(this)"><span>🌱</span><span>Follicular</span></div>
-        <div class="phase-cell on" data-p="ovulation" onclick="pickPhase(this)"><span>✨</span><span>Ovulation</span></div>
+        <div class="phase-cell" data-p="ovulation" onclick="pickPhase(this)"><span>✨</span><span>Ovulation</span></div>
         <div class="phase-cell" data-p="luteal" onclick="pickPhase(this)"><span>🌙</span><span>Luteal</span></div>
       </div>
     </div>
@@ -693,13 +695,37 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
     </div>
 
     <!-- CONCERN -->
-    <div class="p-sec" style="padding-bottom:var(--s3)">
+    <div class="p-sec">
       <p class="p-sec-lbl">Primary Concern</p>
       <div class="p-select-w"><select class="p-select" id="concernSel">
         <option>Uneven texture</option><option>Acne / breakouts</option><option>Dark circles</option>
         <option>Dehydration</option><option>Hyperpigmentation</option><option>Large pores</option>
         <option>Redness / sensitivity</option><option>Fine lines</option>
       </select></div>
+    </div>
+
+    <!-- MAKEUP INTENSITY (gender-inclusive) -->
+    <div class="p-sec" style="padding-bottom:var(--s3)">
+      <p class="p-sec-lbl">How much makeup?</p>
+      <p style="font-size:11px;font-weight:300;color:var(--g50);line-height:1.6;margin-bottom:var(--s4)">You decide what your ritual looks like. Skincare-only is just as valid as a full editorial finish.</p>
+      <div class="intensity-grid" id="intensityGrid">
+        <div class="intensity-cell" data-lv="none" onclick="pickIntensity(this)">
+          <span class="i-name">Skincare<br>only</span>
+          <span class="i-desc">No makeup. Just the ritual for your skin.</span>
+        </div>
+        <div class="intensity-cell on" data-lv="minimal" onclick="pickIntensity(this)">
+          <span class="i-name">Minimal</span>
+          <span class="i-desc">A single point of expression. Tinted balm, brow, lip.</span>
+        </div>
+        <div class="intensity-cell" data-lv="refined" onclick="pickIntensity(this)">
+          <span class="i-name">Refined</span>
+          <span class="i-desc">Even-toned skin, defined eye, considered lip.</span>
+        </div>
+        <div class="intensity-cell" data-lv="full" onclick="pickIntensity(this)">
+          <span class="i-name">Full editorial</span>
+          <span class="i-desc">Every step. Sculpted, lacquered, complete.</span>
+        </div>
+      </div>
     </div>
 
     <div class="setup-cta">
